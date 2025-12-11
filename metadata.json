@@ -1,0 +1,7 @@
+{
+  "name": "Festive Christmas Tree",
+  "description": "An interactive, animated Christmas tree with customizable lights, falling snow, and festive atmosphere.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
