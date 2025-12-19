@@ -215,6 +215,9 @@ const Tree: React.FC<TreeProps> = ({ lightsOn, colorMode }) => {
         baseX: centerX,
         baseY: 75
       });
+
+      // Sort by Z once during initialization
+      particles.sort((a, b) => (a.z - b.z));
     };
 
     const drawStar = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number, color: string) => {
@@ -251,64 +254,39 @@ const Tree: React.FC<TreeProps> = ({ lightsOn, colorMode }) => {
 
       const wind = Math.sin(time) * 3;
 
-      // Sort by Z for simple depth sorting
-      // We also bias by Y slightly so lower branches cover higher ones if same Z?
-      // Actually standard Z sort is best for rotation, but here we just have static Z mostly.
-      // Since it's a 2D projection, things in 'front' (positive Z) should be drawn last.
-      // However, our Z is just relative to center. 
-      // Let's sort by Z index roughly.
-      particles.sort((a, b) => (a.z - b.z)); 
-      // Actually we want back (-Z) drawn first, Front (+Z) drawn last.
-
       particles.forEach((p, i) => {
         // Sway logic
         const sway = wind * p.swayOffset;
         p.x = p.baseX + sway;
 
-        // Skip if it's behind the tree center too much and is a decoration (occlusion)
-        // Simple hack: if z is very negative, it's behind the dense foliage
-        // if (p.z < -20 && (p.type === 'ornament' || p.type === 'light')) {
-        //     ctx.globalAlpha = 0.3; 
-        // } else {
-        //     ctx.globalAlpha = 1;
-        // }
-
         if (p.type === 'trunk') {
             ctx.fillStyle = p.color;
             ctx.beginPath();
-            // Draw a small irregular bark piece
             ctx.rect(p.x - p.size/2, p.y - p.size/2, p.size, p.size * 1.5);
             ctx.fill();
         } else if (p.type === 'leaf') {
             ctx.beginPath();
-            // Pine needle look
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p.x - p.size, p.y + p.size * 2); 
             ctx.strokeStyle = p.color;
             ctx.lineWidth = 1.5;
             ctx.stroke();
         } else if (p.type === 'tinsel') {
-            // Tinsel sparkles
             const shimmer = Math.sin(time * 5 + p.y) > 0 ? '#FFFFAA' : '#CCAA00';
             ctx.fillStyle = shimmer;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
         } else if (p.type === 'ornament') {
-             // 3D Bauble Look
              const grad = ctx.createRadialGradient(p.x - 2, p.y - 2, 1, p.x, p.y, p.size);
-             grad.addColorStop(0, 'white'); // Highlight
+             grad.addColorStop(0, 'white'); 
              grad.addColorStop(0.2, '#ff4444');
-             grad.addColorStop(1, '#880000'); // Shadow
+             grad.addColorStop(1, '#880000'); 
              
              ctx.beginPath();
              ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
              ctx.fillStyle = grad;
              ctx.fill();
-             // String/Hook
-             // ctx.moveTo(p.x, p.y - p.size);
-             // ctx.lineTo(p.x, p.y - p.size - 2);
-             // ctx.stroke();
         } else if (p.type === 'light') {
             if (lightsOn) {
                 const blink = Math.sin(time * 4 + (p.blinkOffset || 0));

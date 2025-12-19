@@ -41,6 +41,9 @@ const Snow: React.FC = () => {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = "white";
+
       particles.forEach((p, i) => {
         p.y += p.speed;
         p.x += p.wind + Math.sin(p.y * 0.01) * 0.5;
@@ -56,10 +59,6 @@ const Snow: React.FC = () => {
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
         ctx.fill();
-        
-        // Subtle glow for snow
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = "white";
       });
 
       // Reset shadow for performance

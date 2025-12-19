@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Snow from './components/Snow';
 import Tree from './components/Tree';
 import Controls from './components/Controls';
@@ -12,17 +12,13 @@ const App: React.FC = () => {
     snowEnabled: true,
   });
 
-  const updateSetting = <K extends keyof TreeSettings>(key: K, value: TreeSettings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-  
-  const setSnowEnabled = (enabled: boolean) => {
-    setSettings(prev => {
-        if (prev.snowEnabled === enabled) return prev;
-        return { ...prev, snowEnabled: enabled };
+  const updateSetting = useCallback(<K extends keyof TreeSettings>(key: K, value: TreeSettings[K]) => {
+    setSettings((prev) => {
+      if (prev[key] === value) return prev;
+      return { ...prev, [key]: value };
     });
-  };
-
+  }, []);
+  
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#050A19] flex flex-col items-center justify-end pb-10">
       
@@ -64,7 +60,7 @@ const App: React.FC = () => {
       {/* Gesture Control for Snow */}
       <GestureController 
         isSnowEnabled={settings.snowEnabled} 
-        setSnowEnabled={setSnowEnabled} 
+        setSnowEnabled={(enabled) => updateSetting('snowEnabled', enabled)} 
       />
 
       <Controls settings={settings} updateSetting={updateSetting} />
